@@ -12,11 +12,11 @@ let screen2Texts = ["DOSWIADCZ DESIGNU ", " STWORZ WIZJE PRZYSZLOSCI ", "ROZPOCZ
 let screen2Positions = [0, 0, 0];
 let screen2Line3Stopped = false; 
 
-// Ekran 3, 4, 5, 6 (Pozycje przewijanych pasków)
-let headerPositions = { 3: 0, 4: 0, 5: 0, 6: 0 };
+// Ekran 3, 4, 5 (Pozycje przewijanych pasków)
+let headerPositions = { 3: 0, 4: 0, 5: 0 };
 let screen3Price = 5001; 
 
-// Ekran 4 - zmienione na proporcje pctX i pctY względem bazy 1200x675
+// Ekran 4
 let auras = [];
 
 // Ekran 5
@@ -24,15 +24,13 @@ let speechRec;
 let spokenText = ""; 
 let isRecording = false;
 let hasSpoken = false; 
-let btnDostarcz = { x: 0, y: 0, w: 250, h: 70 }; // Pozycja liczona dynamicznie
-
-// Finałowa wiadomość
-let finalMessage = "Właśnie doświadczyłeś/aś cyfrowego 'hostile designu'.\n\nDla wprawnego użytkownika ten interfejs był tylko małą przeszkodą. Jednak dla osób 'małokomputerowych' brak etykiet tekstowych, niejednoznaczne ikony oraz presja ze strony systemu są barierą nie do przejścia.\n\nMinimalizm w projektowaniu często nie służy użyteczności – buduje elityzm i generuje wykluczenie społeczne, wywołując u starszych lub niewprawnych technicznie osób wstyd, lęk i zrezygnowanie.";
+let btnDostarcz = { x: 0, y: 0, w: 250, h: 70 }; 
 
 let imgPlus, imgMinus, imgArrows, imgMic;
 
 function usunPolskieZnaki(text) {
-  return text.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  let tekstBezL = text.replace(/Ł/g, "L").replace(/ł/g, "l");
+  return tekstBezL.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
 }
 
 function preload() {
@@ -45,7 +43,6 @@ function preload() {
 function setup() {
   createCanvas(windowWidth, windowHeight);
 
-  // Ustawienie dynamicznych pozycji zależnych od wielkości ekranu
   updateDynamicPositions();
 
   // Inicjalizacja Ekranu 1
@@ -53,7 +50,7 @@ function setup() {
     screen1Lines.push({ x: 0, y: (height / lineCount) * i + (height / lineCount) / 2, stopped: false });
   }
 
-  // Inicjalizacja Ekranu 4 przy użyciu proporcji (oryginalna_pozycja / oryginalny_wymiar)
+  // Inicjalizacja Ekranu 4 przy użyciu proporcji
   auras = [
     { text: "AURA", pctX: 750/1200, pctY: 220/675, baseColor: [250, 70, 50], currentSize: 70, defaultSize: 70 },
     { text: "AURA", pctX: 140/1200, pctY: 400/675, baseColor: [230, 255, 0], currentSize: 60, defaultSize: 60 },
@@ -71,15 +68,15 @@ function setup() {
     speechRec.lang = 'pl-PL'; 
     speechRec.interimResults = true; 
     
-    speechRec.onstart = () => { isRecording = true; spokenText = "Słucham..."; hasSpoken = false; };
+    speechRec.onstart = () => { isRecording = true; spokenText = "Slucham..."; hasSpoken = false; };
     speechRec.onresult = (e) => {
       let rawTranscribedText = e.results[e.resultIndex][0].transcript;
       spokenText = usunPolskieZnaki(rawTranscribedText);
       hasSpoken = true; 
     };
-    speechRec.onend = () => { isRecording = false; if (spokenText === "Słucham...") spokenText = ""; };
+    speechRec.onend = () => { isRecording = false; if (spokenText === "Slucham...") spokenText = ""; };
   } else {
-    spokenText = "Brak obsługi mikrofonu w przeglądarce.";
+    spokenText = "Brak obslugi mikrofonu w przeglądarce.";
   }
 }
 
@@ -94,7 +91,6 @@ function windowResized() {
   
   for (let i = 0; i < screen1Lines.length; i++) {
     screen1Lines[i].y = (height / lineCount) * i + (height / lineCount) / 2;
-    // Jeśli linia już skończyła bieg, dopasuj jej pozycję do nowej szerokości ekranu
     if (screen1Lines[i].stopped) {
       push();
       textFont('beastly');
@@ -113,7 +109,7 @@ function draw() {
     case 2: drawScreen3(); break;
     case 3: drawScreen4(); break;
     case 4: drawScreen5(); break;
-    case 5: drawScreen6(); break;
+    case 5: drawScreenHostile(); break; 
   }
 
   fill(redCircleCursor ? [255, 0, 0] : [57, 255, 20]);
@@ -133,9 +129,6 @@ function drawScrollingHeader(txt, screenKey, speed, yPos, size, col, dir = -1) {
   text(txt.repeat(15), dir === 1 ? headerPositions[screenKey] - w : headerPositions[screenKey], yPos);
 }
 
-// **********************************************************
-// AKTUALIZACJA EKRANU 1: EASING ANIMACJI
-// **********************************************************
 function drawScreen1() {
   background(130, 20, 10); 
   textFont('beastly'); 
@@ -144,7 +137,7 @@ function drawScreen1() {
   textAlign(LEFT, CENTER); 
 
   let tWidth = textWidth(screen1Text);
-  let targetX = width - tWidth; // Cel, do którego dąży tekst
+  let targetX = width - tWidth;
 
   for (let i = 0; i < screen1Lines.length; i++) {
     fill(i % 2 === 0 ? [250, 70, 70] : [255, 180, 180]);
@@ -154,16 +147,11 @@ function drawScreen1() {
 
   if (currentLineIndex < lineCount) {
     let currentLine = screen1Lines[currentLineIndex];
-    
-    // Obliczanie dystansu do celu
     let dx = targetX - currentLine.x;
     
-    // Zwiększanie pozycji o ułamek pozostałego dystansu (0.12 odpowiada za prędkość)
-    // Zmniejsz tę wartość (np. do 0.08) dla wolniejszego, bardziej miękkiego ruchu
-    currentLine.x += dx * 0.08; 
+    currentLine.x += dx * 0.12; 
     
-    // Sprawdzenie, czy obiekt zbliżył się wystarczająco blisko celu (próg zatrzaśnięcia)
-    if (abs(targetX - currentLine.x) < 0.3) {
+    if (abs(targetX - currentLine.x) < 0.5) {
       currentLine.x = targetX; 
       currentLine.stopped = true; 
       currentLineIndex++; 
@@ -172,7 +160,6 @@ function drawScreen1() {
     currentScreen = 1; 
   }
 }
-// **********************************************************
 
 function drawScreen2() {
   background(10, 10, 50); 
@@ -283,22 +270,76 @@ function drawScreen5() {
   }
 }
 
-function drawScreen6() {
-  background(20, 20, 30); 
-  textFont('beastly'); 
-  textAlign(LEFT, TOP);
-  
-  drawScrollingHeader("HOSTILE DESIGN ", 6, 3, -15, 180, '#b9c3ff', -1);
+// **********************************************************
+// NOWY ZAPROJEKTOWANY EKRAN (Ekran 5 w kodzie, ScreenHostile)
+// **********************************************************
+function drawScreenHostile() {
+  background('#040849'); 
 
-  textFont('Helvetica'); 
-  textSize(34);
-  textStyle(NORMAL);
-  textAlign(CENTER, CENTER);
-  fill(240); 
-  
-  rectMode(CENTER);
-  text(finalMessage, width / 2, height / 2 + 50, width * 0.75, height * 0.7);
-  rectMode(CORNER);
+  // Jasnofioletowy geometryczny kształt w prawym górnym rogu
+  noStroke();
+  fill('#828bf9');
+  beginShape();
+  vertex(width, 0);
+  vertex(width * 0.65, 0); 
+  vertex(width * 0.65, height * 0.2); 
+  vertex(width - width * 0.12, height * 0.2); 
+  vertex(width - width * 0.12, height * 0.6); 
+  vertex(width, height * 0.6);
+  endShape(CLOSE);
+
+  textFont('headline-gothic-atf-round');
+  textAlign(LEFT, TOP);
+
+  // Numer "1."
+  fill('#ff4a3d');
+  textSize(height * 0.11); 
+  text("1.", width * 0.05, height * 0.06);
+
+  // Główny tekst (usunięto polskie znaki)
+  fill('#828bf9');
+  textSize(height * 0.14);
+  textLeading(height * 0.16); 
+  text("WLASNIE\nDOSWIADCZYLAS/ES\nCYFROWEGO", width * 0.05, height * 0.25);
+
+  // Czerwony tekst na dole
+  fill('#ff4a3d');
+  text("HOSTILE DESIGNU.", width * 0.05, height * 0.76);
+
+  // Strzałki w prawym dolnym rogu (>> )
+  noFill();
+  strokeWeight(width * 0.015);
+  strokeJoin(MITER);  
+  strokeCap(PROJECT); 
+
+  let arrowX = width * 0.85;
+  let arrowY = height * 0.75;
+  let spacing = width * 0.05;
+  let arrowSize = height * 0.08;
+
+  // Jasnofioletowa strzałka
+  stroke('#828bf9');
+  beginShape();
+  vertex(arrowX, arrowY);
+  vertex(arrowX + arrowSize, arrowY + arrowSize);
+  vertex(arrowX, arrowY + arrowSize * 2);
+  endShape();
+
+  // Czerwona strzałka
+  stroke('#ff4a3d');
+  beginShape();
+  vertex(arrowX + spacing, arrowY);
+  vertex(arrowX + spacing + arrowSize, arrowY + arrowSize);
+  vertex(arrowX + spacing, arrowY + arrowSize * 2);
+  endShape();
+
+  noStroke(); // reset
+
+  // Obsługa kursora dla interaktywnego przycisku (strzałek)
+  redCircleCursor = false;
+  if (mouseX >= width * 0.8 && mouseX <= width && mouseY >= height * 0.7 && mouseY <= height) {
+    redCircleCursor = true;
+  }
 }
 
 function mousePressed() {
@@ -311,7 +352,7 @@ function mousePressed() {
       if (mouseY >= height - 200 && mouseY <= height - 110) screen3Price++;
       if (mouseY >= height - 100 && mouseY <= height - 10) screen3Price--;
     }
-    if (mouseX >= width - 150 && width - 45 && mouseY >= height - 200 && mouseY <= height - 24) {
+    if (mouseX >= width - 150 && mouseX <= width - 45 && mouseY >= height - 200 && mouseY <= height - 24) {
       currentScreen = 3; 
     }
   } 
