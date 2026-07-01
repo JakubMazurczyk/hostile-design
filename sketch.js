@@ -1,6 +1,9 @@
 let currentScreen = 0; 
 let redCircleCursor = false; 
 
+// Zmienne na czcionki
+let fontHeadline; 
+
 // Ekran 1
 let screen1Lines = []; 
 let screen1Text = "ZAKUPY ZAKUPY ZAKUPY ZAKUPY ZAKUPY ZAKUPY ZAKUPY ZAKUPY ZAKUPY ZAKUPY ZAKUPY"; 
@@ -42,7 +45,6 @@ function preload() {
 
 function setup() {
   createCanvas(windowWidth, windowHeight);
-
   updateDynamicPositions();
 
   // Inicjalizacja Ekranu 1
@@ -110,6 +112,8 @@ function draw() {
     case 3: drawScreen4(); break;
     case 4: drawScreen5(); break;
     case 5: drawScreenHostile(); break; 
+    case 6: drawScreen6(); break; 
+    case 7: drawScreen7(); break; 
   }
 
   fill(redCircleCursor ? [255, 0, 0] : [57, 255, 20]);
@@ -270,76 +274,181 @@ function drawScreen5() {
   }
 }
 
-// **********************************************************
-// NOWY ZAPROJEKTOWANY EKRAN (Ekran 5 w kodzie, ScreenHostile)
-// **********************************************************
+// EKRAN 5: HOSTILE DESIGNU
 function drawScreenHostile() {
   background('#040849'); 
-
-  // Jasnofioletowy geometryczny kształt w prawym górnym rogu
   noStroke();
-  fill('#828bf9');
-  beginShape();
-  vertex(width, 0);
-  vertex(width * 0.65, 0); 
-  vertex(width * 0.65, height * 0.2); 
-  vertex(width - width * 0.12, height * 0.2); 
-  vertex(width - width * 0.12, height * 0.6); 
-  vertex(width, height * 0.6);
-  endShape(CLOSE);
+  
+  // Narożnik geometryczny
+  fill('#ff564c');
+  rect(width - 380, 0, 380, 110);  
+  rect(width - 140, 0, 140, 350);  
 
-  textFont('headline-gothic-atf-round');
+  textFont('Montserrat');
   textAlign(LEFT, TOP);
 
-  // Numer "1."
-  fill('#ff4a3d');
-  textSize(height * 0.11); 
-  text("1.", width * 0.05, height * 0.06);
+  // Cyfra "1."
+  textSize(150);
+  textStyle(BOLD); 
+  fill('#ff564c');
+  text("1.", 60, 30);
 
-  // Główny tekst (usunięto polskie znaki)
-  fill('#828bf9');
-  textSize(height * 0.14);
-  textLeading(height * 0.16); 
-  text("WLASNIE\nDOSWIADCZYLAS/ES\nCYFROWEGO", width * 0.05, height * 0.25);
+  // Główny blok tekstu
+  textSize(100);
+  textStyle(BOLD); 
+  fill('#8d99ff'); 
+  
+  let startY = 200; 
+  let lineSpacing = 115; 
+  
+  text("Właśnie", 60, startY);
+  text("doświadczyłaś/eś", 60, startY + lineSpacing);
+  text("cyfrowego", 60, startY + lineSpacing * 2);
 
-  // Czerwony tekst na dole
-  fill('#ff4a3d');
-  text("HOSTILE DESIGNU.", width * 0.05, height * 0.76);
+  // Fraza dolna
+  fill('#ff564c');
+  let hostileY = startY + lineSpacing * 3 + 15;
+  text("Hostile Designu.", 60, hostileY);
 
-  // Strzałki w prawym dolnym rogu (>> )
-  noFill();
-  strokeWeight(width * 0.015);
-  strokeJoin(MITER);  
-  strokeCap(PROJECT); 
+  // ZUNIFIKOWANE CZERWONE STRZAŁKI NAWIGACJI
+  textSize(110);
+  textAlign(RIGHT, BOTTOM);
+  textStyle(BOLD);
+  
+  fill('#ff564c'); 
+  text(">", width - 140, height - 35);
+  fill('#ff564c'); 
+  text(">", width - 50, height - 35);
 
-  let arrowX = width * 0.85;
-  let arrowY = height * 0.75;
-  let spacing = width * 0.05;
-  let arrowSize = height * 0.08;
-
-  // Jasnofioletowa strzałka
-  stroke('#828bf9');
-  beginShape();
-  vertex(arrowX, arrowY);
-  vertex(arrowX + arrowSize, arrowY + arrowSize);
-  vertex(arrowX, arrowY + arrowSize * 2);
-  endShape();
-
-  // Czerwona strzałka
-  stroke('#ff4a3d');
-  beginShape();
-  vertex(arrowX + spacing, arrowY);
-  vertex(arrowX + spacing + arrowSize, arrowY + arrowSize);
-  vertex(arrowX + spacing, arrowY + arrowSize * 2);
-  endShape();
-
-  noStroke(); // reset
-
-  // Obsługa kursora dla interaktywnego przycisku (strzałek)
-  redCircleCursor = false;
-  if (mouseX >= width * 0.8 && mouseX <= width && mouseY >= height * 0.7 && mouseY <= height) {
+  // Zunifikowana detekcja kolizji myszy
+  if (mouseX > width - 240 && mouseX < width - 40 && mouseY > height - 150 && mouseY < height - 30) {
     redCircleCursor = true;
+  } else {
+    redCircleCursor = false;
   }
+}
+
+// EKRAN 6: PUNKT 2 (PRZYCIĘTE "H" + MARGINES + CZERWONE STRZAŁKI)
+function drawScreen6() {
+  background('#040849'); 
+  noStroke();
+
+  // STYLIZOWANE PRZYCIĘTE "H"
+  fill('#8d99ff');
+  rect(width - 240, 0, 100, height);
+  rect(width - 70, 0, 70, height);
+  rect(width - 240, height / 2 - 40, 240, 80);
+
+  textFont('Montserrat');
+  textAlign(LEFT, TOP);
+  textStyle(BOLD);
+
+  // Cyfra "2."
+  textSize(150);
+  fill('#ff564c');
+  text("2.", 60, 30);
+
+  // Blok opisowy (Dostosowany margines na dole)
+  textSize(46);
+  fill('#8d99ff');
+  
+  let sY = 190;      
+  let sSpace = 46;   
+  
+  text("Dla wprawnego użytkownika", 60, sY);
+  text("ten interfejs był tylko małą", 60, sY + sSpace);
+  text("przeszkodą. Jednak dla osób", 60, sY + sSpace * 2);
+  
+  // Wyróżnienie "małokomputerowych"
+  fill('#ff564c');
+  text('"małokomputerowych"', 60, sY + sSpace * 3);
+  
+  fill('#8d99ff');
+  let offsetW = textWidth('"małokomputerowych" ');
+  text("brak", 60 + offsetW, sY + sSpace * 3);
+  
+  text("etykiet tekstowych,", 60, sY + sSpace * 4);
+  text("niejednoznaczne ikony", 60, sY + sSpace * 5);
+  text("i presja ze strony systemu", 60, sY + sSpace * 6);
+  
+  text("są ", 60, sY + sSpace * 7);
+  fill('#ff564c');
+  let sąW = textWidth("są ");
+  text("barierą nie do przejścia.", 60 + sąW, sY + sSpace * 7);
+
+  // ZUNIFIKOWANE CZERWONE STRZAŁKI NAWIGACJI
+  textSize(110);
+  textAlign(RIGHT, BOTTOM);
+  
+  fill('#ff564c'); 
+  text(">", width - 140, height - 35);
+  fill('#ff564c'); 
+  text(">", width - 50, height - 35);
+
+  // Zunifikowana detekcja kolizji myszy
+  if (mouseX > width - 240 && mouseX < width - 40 && mouseY > height - 150 && mouseY < height - 30) {
+    redCircleCursor = true;
+  } else {
+    redCircleCursor = false;
+  }
+}
+
+// EKRAN 7: PUNKT 3 (DOPASOWANY TEKST + BRAK NIEBIESKIEJ STRZAŁKI)
+function drawScreen7() {
+  background('#040849');
+  noStroke();
+
+  // Konstrukcja wielkiego czerwonego grota po prawej stronie
+  fill('#ff564c');
+  beginShape();
+  vertex(width, 0);
+  vertex(width - 320, 0);
+  vertex(width, 320);
+  endShape(CLOSE);
+
+  beginShape();
+  vertex(width, height);
+  vertex(width - 550, height);
+  vertex(width, height - 550);
+  endShape(CLOSE);
+
+  textFont('Montserrat');
+  textAlign(LEFT, TOP);
+  textStyle(BOLD);
+
+  // Cyfra "3."
+  textSize(150);
+  fill('#ff564c');
+  text("3.", 60, 30);
+
+  // Treść akapitu
+  textSize(44); 
+  fill('#8d99ff');
+  
+  let sY = 200;
+  let sSpace = 48; 
+
+  text("Minimalizm", 60, sY);
+  text("w projektowaniu często", 60, sY + sSpace);
+  text("nie służy użyteczności,", 60, sY + sSpace * 2);
+  text("buduje elitaryzm i generuje", 60, sY + sSpace * 3);
+  
+  // Wyróżnienie "wykluczenie społeczne,"
+  fill('#ff564c');
+  text("wykluczenie społeczne,", 60, sY + sSpace * 4);
+  
+  fill('#8d99ff');
+  text("wywołując u starszych", 60, sY + sSpace * 5);
+  text("lub niewprawnych", 60, sY + sSpace * 6);
+  text("technicznie osób ", 60, sY + sSpace * 7);
+  
+  fill('#ff564c');
+  let tW1 = textWidth("technicznie osób ");
+  text("wstyd,", 60 + tW1, sY + sSpace * 7);
+  
+  text("lęk i zrezygnowanie.", 60, sY + sSpace * 8);
+
+  redCircleCursor = false;
 }
 
 function mousePressed() {
@@ -377,6 +486,20 @@ function mousePressed() {
     }
     if (hasSpoken && !isRecording && mouseX >= btnDostarcz.x - btnDostarcz.w / 2 && mouseX <= btnDostarcz.x + btnDostarcz.w / 2 && mouseY >= btnDostarcz.y - btnDostarcz.h / 2 && mouseY <= btnDostarcz.y + btnDostarcz.h / 2) {
       currentScreen = 5; 
+      redCircleCursor = false;
+    }
+  }
+  // Zunifikowana strefa kliknięcia dla Ekranu 5 -> Przejście do 6
+  else if (currentScreen === 5) {
+    if (mouseX > width - 240 && mouseX < width - 40 && mouseY > height - 150 && mouseY < height - 30) {
+      currentScreen = 6; 
+      redCircleCursor = false;
+    }
+  }
+  // Zunifikowana strefa kliknięcia dla Ekranu 6 -> Przejście do 7
+  else if (currentScreen === 6) {
+    if (mouseX > width - 240 && mouseX < width - 40 && mouseY > height - 150 && mouseY < height - 30) {
+      currentScreen = 7; 
       redCircleCursor = false;
     }
   }
